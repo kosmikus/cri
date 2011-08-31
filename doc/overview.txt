@@ -1,0 +1,144 @@
+
+# Overview of RNG interfaces in Haskell
+
+## System.Random (random)
+
+> -- State
+> data StdGen -- abstract
+> instance RandomGen StdGen
+
+> -- Initialization
+> mkStdGen  :: Int -> StdGen
+> newStdGen :: IO StdGen
+>
+> -- Pure interface
+> next      :: (RandomGen g) => g -> (Int, g)
+> random    :: (Random a, RandomGen g) => g -> (a, g)
+> randomR   :: (Random a, RandomGen g) => (a, a) -> g -> (a, g)
+> randoms   :: (Random a, RandomGen g) => g -> [a]
+> randomRs  :: (Random a, RandomGen g) => (a, a) -> g -> [a]
+>
+> -- Impure interface
+> randomIO  :: (Random a) => IO a
+> randomRIO :: (Random a) => (a, a) -> IO a
+>
+> -- Splitting
+> split     :: (RandomGen g) => g -> (g, g)
+
+## System.Random.Merseene (mersenne-random)
+
+> -- State
+> data MTGen -- abstract
+>
+> -- Initialization
+> newMTGen :: Maybe Word32 -> IO MTGen
+>
+> -- Pure interface (none)
+> random   :: MTRandom a => MTGen -> IO a
+> randoms  :: MTRandom a => MTGen -> [a]
+> randomIO :: MTRandom a => IO a
+
+## System.Random.Mersenne.Pure64 (mersenne-random-pure64)
+
+> -- State
+> data PureMT -- abstract
+>
+> -- Initialization
+> pureMT    :: Word64 -> PureMT
+> newPureMT :: IO PureMT
+>
+> -- Pure interface
+> randomDouble :: PureMT -> (Double, PureMT)
+> randomInt    :: PureMT -> (Int,    PureMT)
+> randomInt64  :: PureMT -> (Int64,  PureMT)
+> randomWord   :: PureMT -> (Word,   PureMT)
+> randomWord64 :: PureMT -> (Word64, PureMT)
+>
+> -- Impure interface (none)
+>
+> -- Splitting (none)
+
+## Random.Xorshift (xorshift)
+
+Just uses System.Random.
+
+> -- State
+> data Xorshift -- abstract
+>
+> -- Initialization
+> makeXorshift :: Integral a => a -> Xorshift
+> newXorshift  :: IO Xorshift
+>
+> instance RandomGen Xorshift
+
+## System.Random.MWC (mwc-random)
+
+> -- State
+> data Gen s -- abstract
+> data Seed -- abstract
+>
+> -- Initialization
+> initialize :: (PrimMonad m, Vector v Word32) => v Word32 -> m (Gen (PrimState m))
+> create     :: (PrimMonad m) => m (Gen (PrimState m)
+> withSystemRandom :: (PrimMonad m) => (Gen (PrimState m) -> m a) -> IO a
+>
+> -- State management
+> save    :: PrimMonad m => Gen (PrimState m) -> m Seed
+> restore :: PrimMonad m => Seed -> m (Gen (PrimState m))
+>
+> -- Pure interface (none)
+>
+> -- Impure interface
+> uniform  :: (PrimMonad m, Variate a) => Gen (PrimState m) -> m a
+> uniformR :: (PrimMonad m, Variate a) => (a, a) -> Gen (PrimState m) -> m a
+>
+> -- Splitting (none)
+
+## Random.MWC.* (AC-Random)
+
+> -- State
+> data Seed -- abstract
+>
+> -- Initialization
+> seed :: [Word32] -> Seed
+>
+> -- Pure interface
+> next_word      :: Seed -> (Word32, Seed)
+> bounded_random :: (BoundedRandom x) => Seed -> (x, Seed)
+> unit_random    :: (UnitRandom    x) => Seed -> (x, Seed)
+> range_random   :: (RangeRandom   x) => (x, x) -> Seed -> (x, Seed)
+>
+> -- Impure interface (none, but provides a simple monadic one)
+>
+> -- Splitting (none)
+
+## Random.LFG (lfg)
+
+> -- State
+> data Gen -- abstract
+>
+> -- Initialization
+> initST     :: Index -> Index -> [Double] -> ST s (GenST s)
+> generators :: [Gen]
+>
+> -- Pure interface
+> step   :: Gen -> (Double, Gen)
+>
+> -- Impure interface
+> stepST :: GenST s -> ST s (Double, GenST s)
+>
+> -- Splitting (indirectly via generators)
+
+# Observations
+
+*   Not all generators have a pure interface.
+*   Not all generators have even pure initialization.
+*   Most generators have no splitting.
+*   Some generators have efficient routines to generate different types of values.
+*   Nearly all generators support ranges.
+*   Most generators support either direct or indirect saving/restoring of the state.
+*   Some generators do impure in IO only, others allow PrimMonad.
+
+# Others to consider?
+
+*   DRBG, crypto-api
