@@ -12,7 +12,7 @@ instance (R.Random a, Monad m) => Generates (StateT R.StdGen m) a where
   random    = stateWrap  R.random
   -- randomR r = stateWrap (R.randomR r)
 
-data Std m = Std { unStd :: Ref m R.StdGen }
+newtype Std m = Std { unStd :: Ref m R.StdGen }
 
 instance (PrimMonad m, R.Random a) => PrimGenerates m Std a where
   randomPrim    p = primWrap  R.random     (unStd p)
