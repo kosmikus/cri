@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, KindSignatures, MultiParamTypeClasses, FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Random.CRI.Source where
 
 import Control.Monad.Primitive
