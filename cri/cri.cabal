@@ -1,0 +1,38 @@
+name:          cri
+version:       0.1.0.1
+license:       BSD3
+license-file:  LICENSE
+author:        Andres Löh <andres@well-typed.com>
+maintainer:    Andres Löh <andres@well-typed.com>
+category:      Random
+synopsis:      Common Random Interface
+bug-reports:   https://github.com/kosmikus/cri/issues
+description:
+  This package aims at providing a common interface
+  to various random number generators.
+  .
+  Package authors who wish to provide functionality
+  that requires a random number generator, but does
+  not rely on a specific one, can depend on this package
+  in order to make their library more flexible.
+  .
+  This package itself does not provide nor depend on
+  a concrete random number generator. Look for one
+  of the cri-X packages if you want the concrete binding
+  of a specific RNG to the common random interface.
+stability:     experimental
+build-type:    Simple
+cabal-version: >= 1.6
+tested-with:   GHC == 7.0.4
+
+source-repository head
+  type:        git
+  location:    https://github.com/kosmikus/cri
+
+library
+  hs-source-dirs:  src
+  ghc-options:     -Wall
+  exposed-modules: Random.CRI
+                   Random.CRI.Source
+  build-depends:   base      >= 3.0 && < 5,
+                   primitive >= 0.3 && < 1
