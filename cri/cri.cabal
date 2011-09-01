@@ -34,5 +34,8 @@ library
   ghc-options:     -Wall
   exposed-modules: Random.CRI
                    Random.CRI.Source
+                   Random.CRI.Utils
   build-depends:   base      >= 3.0 && < 5,
-                   primitive >= 0.3 && < 1
+                   primitive >= 0.3 && < 1,
+                   stateref  >= 0.3 && < 1,
+                   mtl       >= 1.1 && < 3
