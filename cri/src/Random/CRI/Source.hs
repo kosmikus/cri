@@ -1,16 +1,17 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiParamTypeClasses, KindSignatures, FlexibleContexts #-}
 module Random.CRI.Source where
 
-import Control.Monad.Primitive
+data ImpliedGen (m :: * -> *) = ImpliedGen
 
-class Monad m => Source m a where
-  random   :: m a
+random  :: Source       m ImpliedGen a => m a
+random    = grandom    ImpliedGen
 
-class Monad m => RangedSource m a where
-  randomR  :: (a, a) -> m a
+randomR :: RangedSource m ImpliedGen a => (a, a) -> m a
+randomR r = grandomR r ImpliedGen
 
-class PrimMonad m => PrimSource m g a where
-  prandom  :: g m -> m a
+class Monad m => Source m g a where
+  grandom  :: g m -> m a
 
-class PrimMonad m => PrimRangedSource m g a where
-  prandomR :: (a, a) -> g m -> m a
+class Monad m => RangedSource m g a where
+  grandomR :: (a, a) -> g m -> m a
+
