@@ -9,7 +9,7 @@ class RNG g m where
   type Snapshot g :: *
   initM    :: Initializer g -> m g
   saveM    :: g -> m (Snapshot g)
-  restoreM :: Snapshot g -> m ()
+  restoreM :: Snapshot g -> m g
 
 class RNG g m => Splittable g m where
   type SplitInitalizer g :: *
