@@ -1,25 +1,26 @@
 module Random.CRI.Utils where
 
-import Control.Monad.Reader
-import Control.Monad.State
-import Data.StateRef
+import Control.Monad
+import Control.Monad.ST
+import Data.STRef
+import Data.Word
 
-{-# INLINE readerWrap #-}
-readerWrap :: MonadReader g m => (g -> m a) -> m a
-readerWrap f = ask >>= f
+import Random.CRI.Source
 
-{-# INLINE stateWrap #-}
-stateWrap :: MonadState g m => (g -> (a, g)) -> m a
-stateWrap f = do
-  g <- get
-  let (x, g') = f g
-  put g'
-  return x
+-- newtype G32 = G32 [Word32]
+-- newtype G r = G [Word64] -- TODO: use a stream
 
-{-# INLINE primWrap #-}
-primWrap :: Monad m => (g -> (a, g)) -> Ref m g -> m a
-primWrap f p = do
-  g <- readRef p
-  let (x, g') = f g
-  writeRef p g'
-  return x
+newtype R g s = R (STRef s g)
+
+dRandomST :: (Source r g) => R g s -> ST s Word64
+dRandomST (R r) = do
+                    g <- readSTRef r
+                    let (x, g') = random g
+                    writeSTRef r g'
+                    return x
+
+dSave :: R g s -> ST s g
+dSave (R r) = readSTRef r
+
+dRestore :: g -> ST s (R g s)
+dRestore g = liftM R (newSTRef g)
