@@ -2,28 +2,25 @@
 module Random.CRI.LFG where
 
 import Control.Monad.Primitive
-import Control.Monad.State
-import Data.StateRef
+import Control.Monad.Reader
+import Data.Word
 import Random.CRI
 import Random.CRI.Utils
-import qualified Random.LFG as R
+import qualified System.Random.LFG as R
 
-instance Monad m => Source (StateT R.Gen m) ImpliedGen Double where
-  grandom _ = stateWrap R.step
+newtype LFG m = LFG { unLFG :: R.Gen (PrimState m) }
 
-newtype LFG     m = LFG   { unLFG   :: Ref m R.Gen       }
-newtype LFGST s m = LFGST { unLFGST :: Ref m (R.GenST s) }
+instance (PrimMonad m, R.Variate a) => Source       m LFG a where
+  grandom    g = R.uniform    (unLFG g)
 
-instance (PrimMonad m) => Source m LFG Double where
-  grandom (LFG p) = primWrap R.step p
+instance (PrimMonad m, R.Variate a) => RangedSource m LFG a where
+  grandomR r g = R.uniformR r (unLFG g)
 
--- TODO: extend to IO
-instance Source (ST s) (LFGST s) Double where
-  grandom (LFGST p) = do
-    g       <- readRef p
-    (x, g') <- R.stepST g
-    writeRef p g'
-    return x
+instance (PrimMonad m, R.Variate a) => Source       (ReaderT (LFG m) m) ImpliedGen a where
+  grandom    _ = readerWrap (lift . grandom   )
 
-initST :: Int -> Int -> [Double] -> ST s (LFGST s (ST s))
-initST m n xs = liftM LFGST (R.initST m n xs >>= newRef)
+instance (PrimMonad m, R.Variate a) => RangedSource (ReaderT (LFG m) m) ImpliedGen a where
+  grandomR r _ = readerWrap (lift . grandomR r)
+
+create :: (PrimMonad m) => R.Lags -> Int -> [Word32] -> m [LFG m]
+create l n xs = liftM (map LFG) (R.create l n xs)
