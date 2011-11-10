@@ -1,0 +1,26 @@
+name:          cri-haskell-sprng
+version:       0.2.0.1
+license:       BSD3
+license-file:  LICENSE
+author:        Andres Löh <andres@well-typed.com>
+maintainer:    Andres Löh <andres@well-typed.com>
+category:      Random
+synopsis:      Common Random Interface / Instances for Random.LFG (package lfg)
+bug-reports:   https://github.com/kosmikus/cri/issues
+stability:     experimental
+build-type:    Simple
+cabal-version: >= 1.6
+tested-with:   GHC == 7.0.4
+
+source-repository head
+  type:        git
+  location:    https://github.com/kosmikus/cri
+
+library
+  hs-source-dirs:  src
+  ghc-options:     -Wall -fno-warn-orphans
+  exposed-modules: Random.CRI.SPRNG
+  build-depends:   base          >= 3.0   && < 5,
+                   mtl           >= 1.1   && < 3,
+                   haskell-sprng >= 0.0.2 && < 0.1,
+                   cri           >= 0.1   && < 0.2
